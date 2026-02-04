@@ -30,8 +30,8 @@ ROLE_NONG_DAN_ID = 1465291719087100059
 # ==========================
 # 🖼️ BANNER
 # ==========================
-BANNER_MAIN_URL = "https://cdn.discordapp.com/attachments/1443938299646312691/1468620460655644829/ChatGPT_Image_21_51_11_4_thg_2_2026.png"
-BANNER_TOP_URL = "https://cdn.discordapp.com/attachments/1443938299646312691/1468620524585484425/ChatGPT_Image_21_15_49_4_thg_2_2026.png"
+BANNER_MAIN_URL = "https://cdn.discordapp.com/attachments/1468688509979070565/1468688569311826186/ChatGPT_Image_21_51_11_4_thg_2_2026.png?ex=6984ee51&is=69839cd1&hm=1edab68d84f0fc3e81855ccc55accca872aac973c41f5bcb688a6503cf3b2b8d&"
+BANNER_TOP_URL = "https://cdn.discordapp.com/attachments/1468688509979070565/1468688625360310576/ChatGPT_Image_21_37_31_4_thg_2_2026.png?ex=6984ee5f&is=69839cdf&hm=14a5a60764ca4e23fc278101f390cb622067f2a2449378278dced55d0847050e&"
 
 # ==========================
 # 🌾 NÔNG SẢN + NPC
