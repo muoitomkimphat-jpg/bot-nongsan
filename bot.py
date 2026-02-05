@@ -45,6 +45,9 @@ NONG_SAN = {
     "khế": ("Khế", "<:khe:1468559895602397343>", "Yeongman"),
     "táo đường": ("Táo Đường", "<:tao_duong:1468559984693612656>", "Yeongman"),
     "trái cổ đại": ("Trái Cổ Đại", "<:trai_co_dai:1468559690278502462>", "Yeongman")
+    "sung": ("Sung", "<:sung:1468838967297446149>", "Yeongman")
+    "mãng cầu": ("Mãng Cầu", "<:mang_cau:1468833219758657546>", "Yeongman")
+    "đu đủ": ("Đu Đủ", "<:du_du:1468836544532975708>", "Yeongman")
 }
 
 # ==========================
