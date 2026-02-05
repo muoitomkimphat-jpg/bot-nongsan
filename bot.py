@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands, tasks
-import os, time, json, difflib, datetime
+from discord.ext import commands
+import os, time, json, datetime
 
 # ==========================
 # 🔑 TOKEN
@@ -30,9 +30,9 @@ BANNER_MAIN_URL = "https://cdn.discordapp.com/attachments/1468688509979070565/14
 # 👤 NPC AVATAR
 # ==========================
 NPC_AVATAR = {
-    "Yeongman": "https://i.imgur.com/yeongman.png",
-    "Tiến Sĩ Brown": "https://i.imgur.com/brown.png",
-    "Lena": "https://i.imgur.com/lena.png"
+    "Yeongman": "https://media.discordapp.net/attachments/1468688509979070565/1468908847694348473/z7504419521891_461a1bd4d3a1c978eea1248c7003ed4b.jpg?ex=6985bb78&is=698469f8&hm=a4e39434754391ac891b844f98d0fa3c1b86e839f88f303778f44b9f744bf044&=&format=webp&width=928&height=928",
+    "Tiến Sĩ Brown": "https://media.discordapp.net/attachments/1468688509979070565/1468908846914338978/z7504419517485_04a4fe6fdb416725a0c77bf5aeff98e1.jpg?ex=6985bb78&is=698469f8&hm=eff9160ac4531739a7d8cbcc136ee4f74f17d81c0da21218ec598f40c37f41de&=&format=webp&width=928&height=928",
+    "Lena": "https://media.discordapp.net/attachments/1468688509979070565/1468908847245561888/z7504419521703_4a9005c06995d2b1eb40ab8df4873d65.jpg?ex=6985bb78&is=698469f8&hm=c5dcb448fe23897b5bc75d0a38fe8e9a59a1ff8cbe8ecbb7b9c1e4c3adbcba23&=&format=webp&width=928&height=928"
 }
 
 # ==========================
@@ -202,7 +202,7 @@ NPC_LINES = {
         "chiều": "Lena: Vòi xanh chiều bán khá chạy!",
         "tối": "Lena: Vòi xanh tối vẫn còn đó!"
     }
-}  # 👈 DÁN NGUYÊN KHỐI BẠN ĐÃ GỬI
+}
 
 # ==========================
 # ⏱️ RESET
@@ -218,13 +218,13 @@ if not os.path.exists(TOP_FILE):
     with open(TOP_FILE, "w") as f:
         json.dump({"nong_san": {}, "cong_cu": {}, "thoi_tiet": {}}, f)
 
-def save_top(data):
-    with open(TOP_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
 def load_top():
     with open(TOP_FILE) as f:
         return json.load(f)
+
+def save_top(data):
+    with open(TOP_FILE, "w") as f:
+        json.dump(data, f, indent=4)
 
 # ==========================
 # 🤖 BOT
@@ -243,11 +243,6 @@ def get_time_slot():
     if 16 <= h < 19: return "chiều"
     return "tối"
 
-def countdown(loai, key):
-    now = time.time()
-    t = RESET_TIME[loai] - int(now - last_report.get(key, 0))
-    return max(0, t)
-
 def npc_line(key):
     return NPC_LINES.get(key, {}).get(get_time_slot(), "...")
 
@@ -263,9 +258,9 @@ async def on_message(message):
     if message.author.bot or message.channel.id != CHANNEL_PHU_ID:
         return
 
-    text = message.content.lower().strip()
-    now = time.time()
+    text = message.content.lower()
     channel = bot.get_channel(CHANNEL_CHINH_ID)
+    now = time.time()
     top = load_top()
 
     def add_top(loai):
@@ -273,53 +268,64 @@ async def on_message(message):
         top[loai][uid] = top[loai].get(uid, 0) + 1
         save_top(top)
 
-    if text in NONG_SAN:
-        ten, emoji, npc = NONG_SAN[text]
-        last_report[text] = now
-        add_top("nong_san")
-        t = countdown("nong_san", text)
-        embed = make_embed(
-            "🌾 NÔNG SẢN KAIA",
-            npc,
-            emoji,
-            f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(text)}\n⏳ Làm mới sau: **{t//60} phút : {t%60:02d} giây**"
-        )
+    # 🌾 NÔNG SẢN
+    for key in NONG_SAN:
+        if key in text:
+            ten, emoji, npc = NONG_SAN[key]
+            last_report[key] = now
+            add_top("nong_san")
 
-    elif text in CONG_CU:
-        ten, emoji, npc = CONG_CU[text]
-        last_report[text] = now
-        add_top("cong_cu")
-        t = countdown("cong_cu", text)
-        embed = make_embed(
-            "🛠️ CÔNG CỤ KAIA",
-            npc,
-            emoji,
-            f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(text)}\n⏳ Làm mới sau: **{t//60} phút : {t%60:02d} giây**"
-        )
+            embed = make_embed(
+                "🌾 NÔNG SẢN KAIA",
+                npc,
+                emoji,
+                f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(key)}"
+            )
 
-    elif text in THOI_TIET:
-        ten, emoji, bt, npc = THOI_TIET[text]
-        last_report[text] = now
-        add_top("thoi_tiet")
-        embed = make_embed(
-            "🌦️ THỜI TIẾT KAIA",
-            npc,
-            emoji,
-            f"{emoji} **{ten}**\nXuất hiện biến thể: **[{bt}]**\n\n💬 {npc_line(text)}"
-        )
-    else:
-        return
+            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
+            await channel.send(embed=embed)
 
-    await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
-    await channel.send(embed=embed)
+    # 🌦️ THỜI TIẾT
+    for key in THOI_TIET:
+        if key in text:
+            ten, emoji, bt, npc = THOI_TIET[key]
+            last_report[key] = now
+            add_top("thoi_tiet")
+
+            embed = make_embed(
+                "🌦️ THỜI TIẾT KAIA",
+                npc,
+                emoji,
+                f"{emoji} **{ten}**\nBiến thể: **[{bt}]**\n\n💬 {npc_line(key)}"
+            )
+
+            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
+            await channel.send(embed=embed)
+
+    # 🛠️ CÔNG CỤ
+    for key in CONG_CU:
+        if key in text:
+            ten, emoji, npc = CONG_CU[key]
+            last_report[key] = now
+            add_top("cong_cu")
+
+            embed = make_embed(
+                "🛠️ CÔNG CỤ KAIA",
+                npc,
+                emoji,
+                f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(key)}"
+            )
+
+            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
+            await channel.send(embed=embed)
 
 @bot.command()
 async def topweek(ctx):
     data = load_top()
     msg = ""
-    for loai, npc in [("nong_san", "Yeongman"), ("thoi_tiet", "Tiến Sĩ Brown"), ("cong_cu", "Lena")]:
+    for loai in ["nong_san", "thoi_tiet", "cong_cu"]:
+        msg += f"\n🏆 **TOP TUẦN {loai.upper()}**\n"
         top3 = sorted(data[loai].items(), key=lambda x: x[1], reverse=True)[:3]
-        msg += f"\n**🏆 TOP TUẦN {loai.upper()}**\n"
         for i, (uid, c) in enumerate(top3, 1):
             user = await bot.fetch_user(int(uid))
             msg += f"{i}. {user.name} ({c} lần)\n"
