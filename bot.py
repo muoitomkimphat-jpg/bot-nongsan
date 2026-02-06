@@ -97,12 +97,21 @@ ITEM_INFO = {
 }
 
 # ================= WEBHOOK =================
-async def send_npc(channel, npc, embed):
+async def send_npc(channel, npc, embed, ping_role=False):
     hooks = await channel.webhooks()
     hook = discord.utils.get(hooks, name=npc)
     if not hook:
         hook = await channel.create_webhook(name=npc)
-    await hook.send(embed=embed, username=npc, avatar_url=NPC_AVATAR[npc])
+
+    content = f"<@&{ROLE_NONG_DAN}>" if ping_role else None
+
+    await hook.send(
+        content=content,
+        embed=embed,
+        username=npc,
+        avatar_url=NPC_AVATAR[npc]
+    )
+
 
 # ================= EMOJI TO URL =================
 def emoji_to_url(emoji: str):
@@ -157,12 +166,16 @@ async def on_message(message):
 
             embed.set_image(url=BANNER_MAIN_URL)
 
-            # 👉 CHỈ SỬA ĐÚNG ĐIỀU KIỆN PING
-            if not pinged and info["npc"] in PING_NPCS:
-                await channel.send(f"<@&{ROLE_NONG_DAN}>")
-                pinged = True
+            await send_npc(
+                channel,
+                info["npc"],
+                embed,
+                ping_role = (not pinged and info["npc"] in PING_NPCS)
+            )
 
-            await send_npc(channel, info["npc"], embed)
+            pinged = True
+
+
 
 # ================= TOP WEEK =================
 @bot.tree.command(name="top", description="Xem top tuần")
@@ -197,5 +210,3 @@ async def on_ready():
     print("✅ BOT ONLINE – FULL NPC SYSTEM")
 
 bot.run(TOKEN)
-
-
