@@ -57,7 +57,7 @@ last_notify = {}
 ALIASES = {
     "bí": "bí ngô",
     "dưa": "dưa hấu",
-    "cát": "gió cát"
+    "cát": "gió cát"
 }
 
 # ================= ITEM INFO =================
