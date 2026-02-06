@@ -1,338 +1,198 @@
 import discord
-from discord.ext import commands
-import os, time, json, datetime
+from discord.ext import commands, tasks
+import datetime, os, json, time
 
-# ==========================
-# 🔑 TOKEN
-# ==========================
+# ================= CONFIG =================
 TOKEN = os.getenv("TOKEN")
-if not TOKEN:
-    print("❌ Chưa thêm TOKEN!")
-    exit()
 
-# ==========================
-# 📌 ID KÊNH
-# ==========================
 CHANNEL_PHU_ID = 1465291905368854570
 CHANNEL_CHINH_ID = 1466801337361764506
+ROLE_NONG_DAN = 1465291719087100059
 
-# ==========================
-# 🌾 ROLE
-# ==========================
-ROLE_NONG_DAN_ID = 1465291719087100059
+DATA_FILE = "data.json"
+COOLDOWN = 180
 
-# ==========================
-# 🖼️ BANNER
-# ==========================
 BANNER_MAIN_URL = "https://cdn.discordapp.com/attachments/1468688509979070565/1468688569311826186/ChatGPT_Image_21_51_11_4_thg_2_2026.png"
 
-# ==========================
-# 👤 NPC AVATAR
-# ==========================
 NPC_AVATAR = {
-    "Yeongman": "https://media.discordapp.net/attachments/1468688509979070565/1468908847694348473/z7504419521891_461a1bd4d3a1c978eea1248c7003ed4b.jpg?ex=6985bb78&is=698469f8&hm=a4e39434754391ac891b844f98d0fa3c1b86e839f88f303778f44b9f744bf044&=&format=webp&width=928&height=928",
-    "Tiến Sĩ Brown": "https://media.discordapp.net/attachments/1468688509979070565/1468908846914338978/z7504419517485_04a4fe6fdb416725a0c77bf5aeff98e1.jpg?ex=6985bb78&is=698469f8&hm=eff9160ac4531739a7d8cbcc136ee4f74f17d81c0da21218ec598f40c37f41de&=&format=webp&width=928&height=928",
-    "Lena": "https://media.discordapp.net/attachments/1468688509979070565/1468908847245561888/z7504419521703_4a9005c06995d2b1eb40ab8df4873d65.jpg?ex=6985bb78&is=698469f8&hm=c5dcb448fe23897b5bc75d0a38fe8e9a59a1ff8cbe8ecbb7b9c1e4c3adbcba23&=&format=webp&width=928&height=928"
+    "Yeongman": "https://media.discordapp.net/attachments/1468688509979070565/1468908847694348473/z7504419521891_461a1bd4d3a1c978eea1248c7003ed4b.jpg",
+    "Lena": "https://media.discordapp.net/attachments/1468688509979070565/1468908847245561888/z7504419521703_4a9005c06995d2b1eb40ab8df4873d65.jpg",
+    "Tiến Sĩ Brown": "https://media.discordapp.net/attachments/1468688509979070565/1468908846914338978/z7504419517485_04a4fe6fdb416725a0c77bf5aeff98e1.jpg"
 }
 
-# ==========================
-# 🌾 NÔNG SẢN
-# ==========================
-NONG_SAN = {
-    "bí ngô": ("Bí Ngô", "<:bi_ngo:1468559344676110529>", "Yeongman"),
-    "dưa hấu": ("Dưa Hấu", "<:dua_hau:1468559217316331624>", "Yeongman"),
-    "dừa": ("Dừa", "<:dua:1468559538159357972>", "Yeongman"),
-    "xoài": ("Xoài", "<:xoai:1468559607247933513>", "Yeongman"),
-    "táo đường": ("Táo Đường", "<:tao_duong:1468559984693612656>", "Yeongman"),
-    "khế": ("Khế", "<:khe:1468559895602397343>", "Yeongman"),
-    "đậu thần": ("Đậu Thần", "<:dau_than:1468559814236962972>", "Yeongman"),
-    "sung": ("Sung", "<:sung:1468838967297446149>", "Yeongman"),
-    "mãng cầu": ("Mãng Cầu", "<:mang_cau:1468833219758657546>", "Yeongman"),
-    "đu đủ": ("Đu Đủ", "<:du_du:1468836544532975708>", "Yeongman")
-}
-
-# ==========================
-# 🛠️ CÔNG CỤ
-# ==========================
-CONG_CU = {
-    "vòi đỏ": ("Vòi Đỏ", "<:voi_do:1468565773592301619>", "Lena"),
-    "vòi xanh": ("Vòi Xanh", "<:voi_xanh:1468565853074362440>", "Lena")
-}
-
-# ==========================
-# 🌦️ THỜI TIẾT
-# ==========================
-THOI_TIET = {
-    "mưa": ("Mưa", "<:mua_rao:1468560753060741140>", "Ẩm Ướt", "Tiến Sĩ Brown"),
-    "mưa bão": ("Mưa Bão", "<:mua_bao:1468560932325294205>", "Nhiễm Điện", "Tiến Sĩ Brown"),
-    "sương mù": ("Sương Mù", "<:suong_mu:1468561014844035237>", "Ẩm Ướt", "Tiến Sĩ Brown"),
-    "sương sớm": ("Sương Sớm", "<:suong_som:1468561105428152543>", "Sương", "Tiến Sĩ Brown"),
-    "cực quang": ("Cực Quang", "<:cuc_quang:1468561214786371696>", "Cực Quang", "Tiến Sĩ Brown"),
-    "ánh trăng": ("Ánh Trăng", "<:anh_trang:1468561408416546853>", "Ánh Trăng", "Tiến Sĩ Brown"),
-    "gió": ("Gió", "<:gio:1468561516872732703>", "Gió", "Tiến Sĩ Brown"),
-    "gió cát": ("Gió Cát", "<:gio_cat:1468561637593190632>", "Cát", "Tiến Sĩ Brown")
-}
-
-# ==========================
-# 🧠 NPC LINE
-# ==========================
-NPC_LINES = {
-    # ================= NÔNG SẢN =================
-    "bí ngô": {
-        "sáng": "Yeongman: Bí ngô buổi sáng rất tươi, mua sớm lời lắm đó!",
-        "trưa": "Yeongman: Bí ngô trưa nay hàng đẹp, tranh thủ kẻo hết!",
-        "chiều": "Yeongman: Chiều rồi, bí ngô này bán chạy lắm nha!",
-        "tối": "Yeongman: Tối đến rồi, ai cần bí ngô thì ghé liền đi!"
-    },
-    "dưa hấu": {
-        "sáng": "Yeongman: Dưa hấu sáng nay ngọt mát, giải nhiệt cực tốt!",
-        "trưa": "Yeongman: Trưa nóng mà có dưa hấu là đúng bài luôn!",
-        "chiều": "Yeongman: Dưa hấu chiều nay chất lượng lắm đó!",
-        "tối": "Yeongman: Tối rồi, dưa hấu vẫn còn nè!"
-    },
-    "dừa": {
-        "sáng": "Yeongman: Dừa sáng nay nước nhiều, rất đáng mua!",
-        "trưa": "Yeongman: Dừa trưa nay uống là mát liền!",
-        "chiều": "Yeongman: Chiều có dừa là hết sảy!",
-        "tối": "Yeongman: Dừa tối nay vẫn còn trong shop đó!"
-    },
-    "xoài": {
-        "sáng": "Yeongman: Xoài sáng nay chín vừa, thơm lắm!",
-        "trưa": "Yeongman: Xoài trưa nay ngọt đậm vị luôn!",
-        "chiều": "Yeongman: Chiều ăn xoài là hợp lý nhất!",
-        "tối": "Yeongman: Xoài tối nay bán nốt đó!"
-    },
-    "táo đường": {
-        "sáng": "Yeongman: Táo đường sáng nay rất hiếm đó nha!",
-        "trưa": "Yeongman: Táo đường trưa nay ai nhanh thì có!",
-        "chiều": "Yeongman: Chiều rồi, táo đường bán chạy lắm!",
-        "tối": "Yeongman: Tối nay táo đường sắp hết hàng!"
-    },
-    "khế": {
-        "sáng": "Yeongman: Khế sáng nay tươi roi rói luôn!",
-        "trưa": "Yeongman: Khế trưa nay giá tốt lắm!",
-        "chiều": "Yeongman: Khế chiều nay rất được ưa chuộng!",
-        "tối": "Yeongman: Tối rồi, khế vẫn còn trong shop!"
-    },
-    "đậu thần": {
-        "sáng": "Yeongman: Đậu thần sáng nay hiếm lắm đó!",
-        "trưa": "Yeongman: Đậu thần trưa nay xuất hiện kìa!",
-        "chiều": "Yeongman: Chiều gặp đậu thần là hên lắm!",
-        "tối": "Yeongman: Đậu thần tối nay ai nhanh thì có!"
-    },
-    "sung": {
-        "sáng": "Yeongman: Sung sáng nay chất lượng cao nha!",
-        "trưa": "Yeongman: Sung trưa nay bán khá chạy đó!",
-        "chiều": "Yeongman: Chiều nay nhiều người hỏi sung lắm!",
-        "tối": "Yeongman: Sung tối nay vẫn còn đó!"
-    },
-    "mãng cầu": {
-        "sáng": "Yeongman: Mãng cầu sáng nay rất thơm!",
-        "trưa": "Yeongman: Mãng cầu trưa nay ngon lắm!",
-        "chiều": "Yeongman: Chiều nay mãng cầu bán chạy ghê!",
-        "tối": "Yeongman: Mãng cầu tối nay còn ít thôi!"
-    },
-    "đu đủ": {
-        "sáng": "Yeongman: Đu đủ sáng nay chín đều lắm!",
-        "trưa": "Yeongman: Đu đủ trưa nay rất đẹp!",
-        "chiều": "Yeongman: Chiều ăn đu đủ là hợp lý nhất!",
-        "tối": "Yeongman: Đu đủ tối nay vẫn còn nha!"
-    },
-
-    # ================= THỜI TIẾT =================
-    "mưa": {
-        "sáng": "Tiến Sĩ Brown: Mưa sáng làm không khí ẩm ướt hơn!",
-        "trưa": "Tiến Sĩ Brown: Mưa trưa ảnh hưởng khá nhiều đó!",
-        "chiều": "Tiến Sĩ Brown: Mưa chiều làm thời tiết thay đổi rõ rệt!",
-        "tối": "Tiến Sĩ Brown: Mưa tối khiến môi trường rất ẩm!"
-    },
-    "mưa bão": {
-        "sáng": "Tiến Sĩ Brown: Mưa bão sáng mang điện tích mạnh!",
-        "trưa": "Tiến Sĩ Brown: Mưa bão trưa cực kỳ nguy hiểm!",
-        "chiều": "Tiến Sĩ Brown: Mưa bão chiều cần chú ý an toàn!",
-        "tối": "Tiến Sĩ Brown: Mưa bão tối ảnh hưởng lớn đến khu vực!"
-    },
-    "sương mù": {
-        "sáng": "Tiến Sĩ Brown: Sương mù sáng gây ẩm ướt nhiều!",
-        "trưa": "Tiến Sĩ Brown: Sương mù trưa vẫn chưa tan hết!",
-        "chiều": "Tiến Sĩ Brown: Sương mù chiều ảnh hưởng tầm nhìn!",
-        "tối": "Tiến Sĩ Brown: Sương mù tối rất dày đặc!"
-    },
-    "sương sớm": {
-        "sáng": "Tiến Sĩ Brown: Sương sớm sáng rất rõ rệt!",
-        "trưa": "Tiến Sĩ Brown: Sương sớm trưa đã tan bớt!",
-        "chiều": "Tiến Sĩ Brown: Sương sớm chiều hiếm gặp!",
-        "tối": "Tiến Sĩ Brown: Sương sớm tối xuất hiện nhẹ!"
-    },
-    "cực quang": {
-        "sáng": "Tiến Sĩ Brown: Cực quang sáng là hiện tượng hiếm!",
-        "trưa": "Tiến Sĩ Brown: Cực quang trưa rất đặc biệt!",
-        "chiều": "Tiến Sĩ Brown: Cực quang chiều phát sáng rõ!",
-        "tối": "Tiến Sĩ Brown: Cực quang tối là đẹp nhất!"
-    },
-    "ánh trăng": {
-        "sáng": "Tiến Sĩ Brown: Ánh trăng sáng còn sót lại!",
-        "trưa": "Tiến Sĩ Brown: Ánh trăng trưa khá yếu!",
-        "chiều": "Tiến Sĩ Brown: Ánh trăng chiều dần xuất hiện!",
-        "tối": "Tiến Sĩ Brown: Ánh trăng tối rất rõ!"
-    },
-    "gió": {
-        "sáng": "Tiến Sĩ Brown: Gió sáng thổi nhẹ!",
-        "trưa": "Tiến Sĩ Brown: Gió trưa khá mạnh!",
-        "chiều": "Tiến Sĩ Brown: Gió chiều dễ chịu!",
-        "tối": "Tiến Sĩ Brown: Gió tối mát lạnh!"
-    },
-    "gió cát": {
-        "sáng": "Tiến Sĩ Brown: Gió cát sáng mang nhiều cát!",
-        "trưa": "Tiến Sĩ Brown: Gió cát trưa rất khó chịu!",
-        "chiều": "Tiến Sĩ Brown: Gió cát chiều ảnh hưởng lớn!",
-        "tối": "Tiến Sĩ Brown: Gió cát tối vẫn còn mạnh!"
-    },
-
-    # ================= CÔNG CỤ =================
-    "vòi đỏ": {
-        "sáng": "Lena: Vòi đỏ sáng nay dùng rất hiệu quả!",
-        "trưa": "Lena: Vòi đỏ trưa giúp tăng năng suất!",
-        "chiều": "Lena: Vòi đỏ chiều nay nhiều người mua!",
-        "tối": "Lena: Vòi đỏ tối sắp hết hàng!"
-    },
-    "vòi xanh": {
-        "sáng": "Lena: Vòi xanh sáng nay rất ổn định!",
-        "trưa": "Lena: Vòi xanh trưa dễ sử dụng!",
-        "chiều": "Lena: Vòi xanh chiều bán khá chạy!",
-        "tối": "Lena: Vòi xanh tối vẫn còn đó!"
-    }
-}
-
-# ==========================
-# ⏱️ RESET
-# ==========================
-RESET_TIME = {"nong_san": 300, "cong_cu": 1800, "thoi_tiet": 300}
-last_report = {}
-
-# ==========================
-# 🏆 TOP TUẦN
-# ==========================
-TOP_FILE = "top_week.json"
-if not os.path.exists(TOP_FILE):
-    with open(TOP_FILE, "w") as f:
-        json.dump({"nong_san": {}, "cong_cu": {}, "thoi_tiet": {}}, f)
-
-def load_top():
-    with open(TOP_FILE) as f:
-        return json.load(f)
-
-def save_top(data):
-    with open(TOP_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-
-# ==========================
-# 🤖 BOT
-# ==========================
-intents = discord.Intents.default()
-intents.message_content = True
+# ================= BOT =================
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-def emoji_url(e):
-    return f"https://cdn.discordapp.com/emojis/{e.split(':')[2][:-1]}.png"
+# ================= TIME =================
+def vn_time():
+    return datetime.datetime.utcnow() + datetime.timedelta(hours=7)
 
-def get_time_slot():
-    h = datetime.datetime.now().hour
+def time_block():
+    h = vn_time().hour
     if 5 <= h < 11: return "sáng"
-    if 11 <= h < 16: return "trưa"
-    if 16 <= h < 19: return "chiều"
+    if 11 <= h < 14: return "trưa"
+    if 14 <= h < 18: return "chiều"
     return "tối"
 
-def npc_line(key):
-    return NPC_LINES.get(key, {}).get(get_time_slot(), "...")
+# ================= DATA =================
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE,"w",encoding="utf8") as f:
+            json.dump({"farm":{}, "tools":{}, "weather":{}, "last_reset":time.time()}, f)
+    with open(DATA_FILE,"r",encoding="utf8") as f:
+        return json.load(f)
 
-def make_embed(title, npc, emoji, content):
-    e = discord.Embed(title=title, description=content, color=0x00ff99)
-    e.set_thumbnail(url=emoji_url(emoji))
-    e.set_author(name=npc, icon_url=NPC_AVATAR[npc])
-    e.set_image(url=BANNER_MAIN_URL)
-    return e
+def save_data(d):
+    with open(DATA_FILE,"w",encoding="utf8") as f:
+        json.dump(d,f,ensure_ascii=False,indent=2)
 
+data = load_data()
+last_notify = {}
+
+# ================= ALIAS =================
+ALIASES = {
+    "bí": "bí ngô",
+    "dưa": "dưa hấu"
+}
+
+# ================= ITEM INFO =================
+ITEM_INFO = {
+    # -------- FARM --------
+    "bí ngô": {"group":"farm","name":"Bí Ngô","emoji":"<:bi_ngo:1468559344676110529>","npc":"Yeongman",
+        "lines":{"sáng":"Bí ngô sáng nay tươi lắm!","trưa":"Bí ngô trưa hàng đẹp!","chiều":"Chiều rồi, bí ngô bán chạy!","tối":"Tối đến rồi, bí ngô còn đó!"}},
+    "dưa hấu": {"group":"farm","name":"Dưa Hấu","emoji":"<:dua_hau:1468559217316331624>","npc":"Yeongman",
+        "lines":{"sáng":"Dưa hấu sáng mát lạnh!","trưa":"Trưa nóng có dưa hấu là chuẩn!","chiều":"Dưa hấu chiều rất ngon!","tối":"Tối rồi, dưa hấu vẫn còn!"}},
+    "dừa": {"group":"farm","name":"Dừa","emoji":"<:dua:1468559538159357972>","npc":"Yeongman",
+        "lines":{"sáng":"Dừa sáng nước nhiều!","trưa":"Dừa trưa uống là mát!","chiều":"Chiều uống dừa là hợp lý!","tối":"Tối rồi mà dừa vẫn còn!"}},
+    "xoài": {"group":"farm","name":"Xoài","emoji":"<:xoai:1468559607247933513>","npc":"Yeongman",
+        "lines":{"sáng":"Xoài sáng chín vừa!","trưa":"Xoài trưa ngọt đậm!","chiều":"Chiều rồi, xoài bán chạy!","tối":"Tối đến, xoài sắp hết!"}},
+    "táo đường": {"group":"farm","name":"Táo Đường","emoji":"<:tao_duong:1468559984693612656>","npc":"Yeongman",
+        "lines":{"sáng":"Táo đường sáng hiếm lắm!","trưa":"Táo đường trưa rất ngon!","chiều":"Chiều rồi, táo đường bán mạnh!","tối":"Tối đến, táo đường còn ít!"}},
+    "khế": {"group":"farm","name":"Khế","emoji":"<:khe:1468559895602397343>","npc":"Yeongman",
+        "lines":{"sáng":"Khế sáng tươi roi rói!","trưa":"Khế trưa giá tốt!","chiều":"Chiều khế bán ổn!","tối":"Tối rồi, khế vẫn còn!"}},
+    "đậu thần": {"group":"farm","name":"Đậu Thần","emoji":"<:dau_than:1468559814236962972>","npc":"Yeongman",
+        "lines":{"sáng":"Đậu thần sáng rất hiếm!","trưa":"Đậu thần trưa xuất hiện kìa!","chiều":"Chiều gặp đậu thần là hên!","tối":"Tối rồi, ai nhanh thì có!"}},
+    "sung": {"group":"farm","name":"Sung","emoji":"<:sung:1468838967297446149>","npc":"Yeongman",
+        "lines":{"sáng":"Sung sáng chất lượng cao!","trưa":"Sung trưa bán chạy!","chiều":"Chiều nhiều người hỏi sung!","tối":"Tối rồi, sung vẫn còn!"}},
+    "mãng cầu": {"group":"farm","name":"Mãng Cầu","emoji":"<:mang_cau:1468833219758657546>","npc":"Yeongman",
+        "lines":{"sáng":"Mãng cầu sáng rất thơm!","trưa":"Mãng cầu trưa ngon lắm!","chiều":"Chiều mãng cầu bán mạnh!","tối":"Tối rồi, mãng cầu còn ít!"}},
+    "đu đủ": {"group":"farm","name":"Đu Đủ","emoji":"<:du_du:1468836544532975708>","npc":"Yeongman",
+        "lines":{"sáng":"Đu đủ sáng chín đều!","trưa":"Đu đủ trưa rất đẹp!","chiều":"Chiều ăn đu đủ là hợp nhất!","tối":"Tối rồi, đu đủ vẫn còn!"}},
+
+    # -------- TOOLS --------
+    "vòi đỏ": {"group":"tools","name":"Vòi Đỏ","emoji":"<:voi_do:1468565773592301619>","npc":"Lena",
+        "lines":{"sáng":"Vòi đỏ sáng dùng rất hiệu quả!","trưa":"Vòi đỏ trưa tăng năng suất!","chiều":"Chiều vòi đỏ bán chạy!","tối":"Tối rồi, vòi đỏ sắp hết!"}},
+    "vòi xanh": {"group":"tools","name":"Vòi Xanh","emoji":"<:voi_xanh:1468565853074362440>","npc":"Lena",
+        "lines":{"sáng":"Vòi xanh sáng ổn định lắm!","trưa":"Vòi xanh trưa dễ dùng!","chiều":"Chiều vòi xanh bán tốt!","tối":"Tối rồi, vòi xanh vẫn còn!"}},
+
+    # -------- WEATHER --------
+    "mưa": {"group":"weather","name":"Mưa","emoji":"<:mua_rao:1468560753060741140>","variant":"Ẩm Ướt","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Mưa sáng làm không khí ẩm hơn!","trưa":"Mưa trưa ảnh hưởng mùa vụ!","chiều":"Mưa chiều thay đổi thời tiết!","tối":"Mưa tối khiến môi trường ẩm!"}},
+    "mưa bão": {"group":"weather","name":"Mưa Bão","emoji":"<:mua_bao:1468560932325294205>","variant":"Nhiễm Điện","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Mưa bão sáng rất nguy hiểm!","trưa":"Mưa bão trưa cực kỳ nguy hiểm!","chiều":"Chiều mưa bão cần chú ý!","tối":"Mưa bão tối ảnh hưởng lớn!"}},
+    "sương mù": {"group":"weather","name":"Sương Mù","emoji":"<:suong_mu:1468561014844035237>","variant":"Ẩm Ướt","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Sương mù sáng rất dày!","trưa":"Sương mù trưa vẫn chưa tan!","chiều":"Chiều sương mù ảnh hưởng tầm nhìn!","tối":"Sương mù tối rất dày!"}},
+    "sương sớm": {"group":"weather","name":"Sương Sớm","emoji":"<:suong_som:1468561105428152543>","variant":"Sương","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Sương sớm sáng rất rõ!","trưa":"Sương sớm trưa tan bớt!","chiều":"Chiều hiếm gặp sương sớm!","tối":"Sương sớm tối xuất hiện nhẹ!"}},
+    "cực quang": {"group":"weather","name":"Cực Quang","emoji":"<:cuc_quang:1468561214786371696>","variant":"Cực Quang","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Cực quang sáng rất hiếm!","trưa":"Cực quang trưa đặc biệt!","chiều":"Cực quang chiều phát sáng rõ!","tối":"Cực quang tối đẹp nhất!"}},
+    "ánh trăng": {"group":"weather","name":"Ánh Trăng","emoji":"<:anh_trang:1468561408416546853>","variant":"Ánh Trăng","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Ánh trăng sáng còn sót lại!","trưa":"Ánh trăng trưa khá yếu!","chiều":"Ánh trăng chiều dần xuất hiện!","tối":"Ánh trăng tối rất rõ!"}},
+    "gió": {"group":"weather","name":"Gió","emoji":"<:gio:1468561516872732703>","variant":"Gió","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Gió sáng thổi nhẹ!","trưa":"Gió trưa khá mạnh!","chiều":"Gió chiều dễ chịu!","tối":"Gió tối mát lạnh!"}},
+    "gió cát": {"group":"weather","name":"Gió Cát","emoji":"<:gio_cat:1468561637593190632>","variant":"Cát","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Gió cát sáng mang nhiều cát!","trưa":"Gió cát trưa rất khó chịu!","chiều":"Gió cát chiều ảnh hưởng lớn!","tối":"Gió cát tối vẫn còn mạnh!"}},
+    "nắng nóng": {"group":"weather","name":"Nắng Nóng","emoji":"<:nang_nong:1468561712411316356>","variant":"Khô","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Nắng nóng sáng làm đất khô nhanh!","trưa":"Nắng trưa gay gắt!","chiều":"Chiều nắng nóng kéo dài!","tối":"Tối vẫn oi bức!"}}
+}
+
+# ================= WEBHOOK =================
+async def send_npc(channel, npc, embed):
+    hooks = await channel.webhooks()
+    hook = discord.utils.get(hooks, name=npc)
+    if not hook:
+        hook = await channel.create_webhook(name=npc)
+    await hook.send(embed=embed, username=npc, avatar_url=NPC_AVATAR[npc])
+
+# ================= LISTENER =================
 @bot.event
 async def on_message(message):
     if message.author.bot or message.channel.id != CHANNEL_PHU_ID:
         return
 
     text = message.content.lower()
+    for a,b in ALIASES.items():
+        text = text.replace(a,b)
+
     channel = bot.get_channel(CHANNEL_CHINH_ID)
-    now = time.time()
-    top = load_top()
+    now = time_block()
+    pinged = False
 
-    def add_top(loai):
-        uid = str(message.author.id)
-        top[loai][uid] = top[loai].get(uid, 0) + 1
-        save_top(top)
+    for item,info in ITEM_INFO.items():
+        if item in text:
+            if item in last_notify and time.time() - last_notify[item] < COOLDOWN:
+                continue
 
-    # 🌾 NÔNG SẢN
-    for key in NONG_SAN:
-        if key in text:
-            ten, emoji, npc = NONG_SAN[key]
-            last_report[key] = now
-            add_top("nong_san")
+            last_notify[item] = time.time()
+            data[info["group"]][item] = data[info["group"]].get(item,0) + 1
+            save_data(data)
 
-            embed = make_embed(
-                "🌾 NÔNG SẢN KAIA",
-                npc,
-                emoji,
-                f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(key)}"
+            embed = discord.Embed(
+                title=f"📢 THÔNG BÁO {info['group'].upper()}",
+                description=f"{info['emoji']} **{info['name']}**",
+                color=0x00ffaa
             )
 
-            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
-            await channel.send(embed=embed)
+            embed.set_author(name=info["npc"], icon_url=NPC_AVATAR[info["npc"]])
 
-    # 🌦️ THỜI TIẾT
-    for key in THOI_TIET:
-        if key in text:
-            ten, emoji, bt, npc = THOI_TIET[key]
-            last_report[key] = now
-            add_top("thoi_tiet")
+            if "variant" in info:
+                embed.add_field(name="Biến Thể", value=info["variant"], inline=True)
 
-            embed = make_embed(
-                "🌦️ THỜI TIẾT KAIA",
-                npc,
-                emoji,
-                f"{emoji} **{ten}**\nBiến thể: **[{bt}]**\n\n💬 {npc_line(key)}"
+            embed.add_field(
+                name="NPC Line",
+                value=f"{info['npc']}: {info['lines'][now]}",
+                inline=False
             )
 
-            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
-            await channel.send(embed=embed)
+            embed.set_image(url=BANNER_MAIN_URL)
 
-    # 🛠️ CÔNG CỤ
-    for key in CONG_CU:
-        if key in text:
-            ten, emoji, npc = CONG_CU[key]
-            last_report[key] = now
-            add_top("cong_cu")
+            if not pinged:
+                await channel.send(f"<@&{ROLE_NONG_DAN}>")
+                pinged = True
 
-            embed = make_embed(
-                "🛠️ CÔNG CỤ KAIA",
-                npc,
-                emoji,
-                f"{emoji} **{ten}**\nđang bán tại cửa hàng\n\n💬 {npc_line(key)}"
-            )
+            await send_npc(channel, info["npc"], embed)
 
-            await channel.send(f"<@&{ROLE_NONG_DAN_ID}>")
-            await channel.send(embed=embed)
+# ================= TOP WEEK =================
+@bot.tree.command(name="top", description="Xem top tuần")
+async def top(interaction: discord.Interaction):
+    d = load_data()
+    embed = discord.Embed(title="🏆 TOP TUẦN", color=0xffd700)
 
-@bot.command()
-async def topweek(ctx):
-    data = load_top()
-    msg = ""
-    for loai in ["nong_san", "thoi_tiet", "cong_cu"]:
-        msg += f"\n🏆 **TOP TUẦN {loai.upper()}**\n"
-        top3 = sorted(data[loai].items(), key=lambda x: x[1], reverse=True)[:3]
-        for i, (uid, c) in enumerate(top3, 1):
-            user = await bot.fetch_user(int(uid))
-            msg += f"{i}. {user.name} ({c} lần)\n"
-    await ctx.send(msg)
+    for g in ["farm","tools","weather"]:
+        top3 = sorted(d[g].items(), key=lambda x:x[1], reverse=True)[:3]
+        txt = ""
+        for i,(n,v) in enumerate(top3):
+            medal = ["🥇","🥈","🥉"][i]
+            txt += f"{medal} {n}: {v}\n"
+        embed.add_field(name=g.upper(), value=txt or "Chưa có dữ liệu", inline=False)
+
+    await interaction.response.send_message(embed=embed)
+
+# ================= RESET WEEK =================
+@tasks.loop(hours=1)
+async def weekly_reset():
+    if time.time() - data["last_reset"] >= 604800:
+        data["farm"]={}
+        data["tools"]={}
+        data["weather"]={}
+        data["last_reset"]=time.time()
+        save_data(data)
 
 @bot.event
 async def on_ready():
-    print("✅ BOT KAIA ONLINE")
+    weekly_reset.start()
+    await bot.tree.sync()
+    print("✅ BOT ONLINE – FULL NPC SYSTEM")
 
 bot.run(TOKEN)
