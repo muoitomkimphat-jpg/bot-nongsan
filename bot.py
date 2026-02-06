@@ -56,7 +56,8 @@ last_notify = {}
 # ================= ALIAS =================
 ALIASES = {
     "bí": "bí ngô",
-    "dưa": "dưa hấu"
+    "dưa": "dưa hấu",
+    "cát": "gió cát"
 }
 
 # ================= ITEM INFO =================
@@ -93,7 +94,21 @@ ITEM_INFO = {
     "mưa": {"group":"weather","name":"Mưa","emoji":"<:mua:1469282976012435568>","variant":"Ẩm Ướt","npc":"Tiến Sĩ Brown",
         "lines":{"sáng":"Mưa sáng làm không khí ẩm hơn!","trưa":"Mưa trưa ảnh hưởng mùa vụ!","chiều":"Mưa chiều thay đổi thời tiết!","tối":"Mưa tối khiến môi trường ẩm!"}},
     "bão": {"group":"weather","name":"Bão","emoji":"<:bao:1469282944475725968>","variant":"Nhiễm Điện","npc":"Tiến Sĩ Brown",
-        "lines":{"sáng":"Bão sáng mang điện tích mạnh!","trưa":"Bão trưa cực kỳ nguy hiểm!","chiều":"Bão chiều cần chú ý an toàn!","tối":"Bão tối ảnh hưởng lớn đến khu vực!"}}
+        "lines":{"sáng":"Bão sáng mang điện tích mạnh!","trưa":"Bão trưa cực kỳ nguy hiểm!","chiều":"Bão chiều cần chú ý an toàn!","tối":"Bão tối ảnh hưởng lớn đến khu vực!"}},
+    "sương mù": {"group":"weather","name":"Sương Mù","emoji":"<:suong_mu:1468561014844035237>","variant":"Ẩm Ướt","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Sương mù sáng giảm tầm nhìn!","trưa":"Sương mù trưa khá hiếm!","chiều":"Chiều sương mù xuất hiện nhẹ!","tối":"Sương mù tối bao phủ khu vực!"}},
+    "sương sớm": {"group":"weather","name":"Sương Sớm","emoji":"<:suong_som:1468561105428152543>","variant":"Sương","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Sương sớm giúp cây giữ ẩm!","trưa":"Sương sớm tan dần rồi!","chiều":"Chiều không còn sương sớm!","tối":"Sương sớm chỉ có buổi sáng!"}},
+    "cực quang": {"group":"weather","name":"Cực Quang","emoji":"<:cuc_quang:1468561214786371696>","variant":"Cực Quang","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Cực quang sáng rất hiếm!","trưa":"Trưa khó thấy cực quang!","chiều":"Chiều cực quang bắt đầu xuất hiện!","tối":"Cực quang tối rực rỡ nhất!"}},
+    "ánh trăng": {"group":"weather","name":"Ánh Trăng","emoji":"<:anh_trang:1468561408416546853>","variant":"Ánh Trăng","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Ánh trăng sáng dần biến mất!","trưa":"Trưa không còn ánh trăng!","chiều":"Chiều chưa có ánh trăng!","tối":"Ánh trăng tối rất đẹp!"}},
+    "gió": {"group":"weather","name":"Gió","emoji":"<:gio:1468561516872732703>","variant":"Gió","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Gió sáng thổi nhẹ!","trưa":"Gió trưa khá mạnh!","chiều":"Chiều gió mát hơn!","tối":"Gió tối thổi đều!"}},
+    "gió cát": {"group":"weather","name":"Gió Cát","emoji":"<:gio_cat:1468561637593190632>","variant":"Gió Cát","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Gió cát sáng gây khó chịu!","trưa":"Gió cát trưa ảnh hưởng lớn!","chiều":"Chiều gió cát vẫn còn!","tối":"Gió cát tối yếu dần!"}},
+    "nắng nóng": {"group":"weather","name":"Nắng Nóng","emoji":"<:nang_nong:1468561712411316356>","variant":"Khô","npc":"Tiến Sĩ Brown",
+        "lines":{"sáng":"Nắng nóng sáng bắt đầu tăng!","trưa":"Nắng nóng trưa rất gay gắt!","chiều":"Chiều nắng nóng vẫn cao!","tối":"Tối nắng nóng giảm dần!"}},   
 }
 
 # ================= WEBHOOK =================
